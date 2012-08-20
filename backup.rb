@@ -1,14 +1,12 @@
 #!/usr/bin/env ruby
 
-require 'yaml'
-
 $proj_dir = File.dirname(__FILE__)
+$:.unshift($proj_dir) 
 
-$jobs = YAML.load_file($proj_dir+'/jobs.yaml').map do |name, settings|
-  Job.new(name, settings) 
-end
+require 'yaml'
+require 'lib/job'
 
-p $jobs 
+$jobs = Job.load_from_yaml($proj_dir+'/jobs.yaml')
 
-
+p $jobs[1].vault
 

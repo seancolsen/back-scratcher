@@ -1,6 +1,7 @@
 
 class Duration
   attr_accessor :seconds
+  include Comparable
 
   UNITS = { :second => 1, 
             :minute => 60,
@@ -17,6 +18,10 @@ class Duration
       if multiplier.nil? then raise "Unknown duration units '#{units}'" end    
       @seconds = value.to_i * multiplier
     end
+  end
+
+  def <=>(other)
+    self.seconds <=> other.seconds
   end
 
 end 
