@@ -1,4 +1,5 @@
 require 'lib/record'
+require 'lib/duration'
 
 class Vault
   attr_accessor :name, :directory, :records
@@ -14,8 +15,8 @@ class Vault
 
   def empty?; self.record_count == 0 end
 
-  def each(&block)
-    @records.each(&block) 
-  end
+  def each(&block); @records.each(&block) end
   
+  def last_modified; @records.max.date end
+
 end

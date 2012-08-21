@@ -12,9 +12,7 @@ class Job
     @vault = Vault.new(@name)
   end
 
-  def running_period
-    self.policy.running_period
-  end
+  def running_period; self.policy.running_period end
 
   def self.load_from_yaml(yaml_file)
     # returns an array of job objects 
@@ -22,6 +20,29 @@ class Job
       Job.new(name, settings) 
     end
   end
+
+  def needs_backup?
+    # TODO
+    true
+  end
+
+  def backup
+    @type == :database ? self.backup_database : self.backup_filesystem
+  end
+
+  def backup_databse
+    #TODO
+  end 
+
+  def backup_filesystem
+    #TODO
+  end 
+
+  def no_backup
+    #TODO log info here
+  end
+
+  def try_backup; self.needs_backup? ? self.backup : self.no_backup end
 
 end
 

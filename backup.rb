@@ -4,9 +4,14 @@ $proj_dir = File.dirname(__FILE__)
 $:.unshift($proj_dir) 
 
 require 'yaml'
-require 'lib/job'
+require 'lib/job_collection'
 
-$jobs = Job.load_from_yaml($proj_dir+'/jobs.yaml')
+jobs = JobCollection.load_from_yaml($proj_dir+'/jobs.yaml')
 
-p $jobs[1].vault
+case ARGV[0]
+  when 'backup'; jobs.backup
+  when 'prune';  jobs.prune
+  when 'report'; jobs.report
+  else; raise 'Invalid command. Must be "backup", "prune", or "report".'
+end
 
