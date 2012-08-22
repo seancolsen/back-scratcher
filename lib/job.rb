@@ -2,7 +2,7 @@ require 'lib/policy'
 require 'lib/vault'
 
 class Job
-  attr_accessor :name, :host, :policy, :source, :type, :vault
+  attr_accessor :name, :host, :user, :policy, :source, :type, :vault
 
   def initialize(name, settings)
     @name = name
@@ -10,9 +10,9 @@ class Job
     @source = settings['source'] 
     @type = @source['database'] ? :database : :filesystem
     @vault = Vault.new(@name)
+    @user = settings['user']
+    @host = settings['host']
   end
-
-  def running_period; self.policy.running_period end
 
   def self.load_from_yaml(yaml_file)
     # returns an array of job objects 
@@ -22,16 +22,28 @@ class Job
   end
 
   def needs_backup?
-    # TODO
-    true
+    if @vault.last_modified == nil
+      true
+    else
+      Time.now - @vault.last_modified > @policy.running_period.seconds
+    end
   end
 
   def backup
     @type == :database ? self.backup_database : self.backup_filesystem
   end
 
-  def backup_databse
-    #TODO
+  def backup_database
+    mysqldump = "mysqldump 
+                 --skip-dump-date
+                 -u#{@source['user']} 
+                 -p#{@source['password']}
+                   #{@source['database']}".gsub(/\s+/,' ').strip
+    @vault.ensure_exists 
+    filename = File.join(@vault.directory,
+        Time.now.strftime('%Y-%m-%dT%H-%M-%S_0.sql.gz') )
+    `ssh #{@user}@#{@host} '#{mysqldump} | gzip -c' > #{filename} `
+    @vault.add_record(filename)
   end 
 
   def backup_filesystem

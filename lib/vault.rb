@@ -13,10 +13,20 @@ class Vault
 
   def record_count; @records.length end
 
+  def ensure_exists
+    unless File.exists?(@directory) 
+      `mkdir -p #{@directory}` 
+    end
+  end
+
   def empty?; self.record_count == 0 end
 
   def each(&block); @records.each(&block) end
+
+  def add_record(filename); @records << Record.new(filename) end
   
-  def last_modified; @records.max.date end
+  def last_modified 
+    self.empty? ? nil : @records.max.date 
+  end
 
 end

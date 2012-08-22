@@ -6,7 +6,8 @@ $:.unshift($proj_dir)
 require 'yaml'
 require 'lib/job_collection'
 
-jobs = JobCollection.load_from_yaml($proj_dir+'/jobs.yaml')
+jobs_file = File.join($proj_dir, 'jobs.yaml')
+jobs = JobCollection.load_from_yaml(jobs_file)
 
 case ARGV[0]
   when 'backup'; jobs.backup
