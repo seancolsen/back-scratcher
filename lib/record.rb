@@ -13,14 +13,14 @@ class Record
     @date = Time.local(year,month,day,hour,minute,second)
     @size = Size.new(size)
     @type = self.directory? ? :directory : :file
-    if @size == 0; self.update_size end
+    if @size.zero?; self.update_size end
   end
 
   def directory?; File.directory?(@path) end
 
   def update_size
-    @size = self.real_size
-    @file = @file.gsub(PATTERN,'\1-\2-\3T\4-\5-\6_'+@size+'\8')
+    @size.bytes = self.real_size
+    @file = @file.gsub(PATTERN, '\1-\2-\3T\4-\5-\6_' + @size.to_s + '\8')
     oldpath = @path
     @path = File.join(File.dirname(@path),@file)
     File.rename(oldpath,@path)

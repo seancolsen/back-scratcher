@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+
+$:.unshift(File.dirname(__FILE__)) 
+require 'yaml'
+require 'lib/job_collection'
+require 'lib/log'
+require 'rubygems'
+require 'commander/import'
+
+jobs_file = File.join($proj_dir, 'jobs.yaml')
+jobs = JobCollection.load_from_yaml(jobs_file)
+
+program :version, "0.1"
+program :description, 'Backup ultility for databases and filesystems'
+ 
+command :backup do |c|
+  c.syntax = 'scratch backup [options]'
+  c.summary = ''
+  c.description = ''
+  c.example 'description', 'command example'
+  c.option '--some-switch', 'Some switch that does something'
+  c.option '--force', 'make backups even if not yet needed'
+  c.action do |args, options|
+    jobs.backup
+  end
+end
+
+command :prune do |c|
+  c.syntax = 'scratch prune [options]'
+  c.summary = ''
+  c.description = ''
+  c.example 'description', 'command example'
+  c.option '--some-switch', 'Some switch that does something'
+  c.action do |args, options|
+    # Do something or c.when_called Backup::Commands::Prune
+  end
+end
+
+command :report do |c|
+  c.syntax = 'scratch report [options]'
+  c.summary = ''
+  c.description = ''
+  c.example 'description', 'command example'
+  c.option '--some-switch', 'Some switch that does something'
+  c.action do |args, options|
+    # Do something or c.when_called Backup::Commands::Report
+  end
+end
+

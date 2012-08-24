@@ -23,10 +23,10 @@ class Vault
 
   def each(&block); @records.each(&block) end
 
-  def add_record(filename); @records << Record.new(filename) end
+  def add_record(path); @records << Record.new(path) end
   
-  def last_modified 
-    self.empty? ? nil : @records.max.date 
-  end
+  def last_modified; self.empty? ? nil : @records.max.date end
+
+  def latest_record; self.empty? ? nil : @records.max end
 
 end

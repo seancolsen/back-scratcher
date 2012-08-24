@@ -19,6 +19,7 @@ class JobCollection
   def prune
     #TODO
     puts 'pruning'
+    Log.info('ok here we go')
   end
 
   def report

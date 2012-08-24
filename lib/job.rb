@@ -4,6 +4,10 @@ require 'lib/vault'
 class Job
   attr_accessor :name, :host, :user, :policy, :source, :type, :vault
 
+  # Number of seconds before a backup is scheduled that it's okay for us 
+  # make one.
+  SLACK = 120 
+
   def initialize(name, settings)
     @name = name
     @policy = Policy.new(settings['keep-every']) 
@@ -25,36 +29,41 @@ class Job
     if @vault.last_modified == nil
       true
     else
-      Time.now - @vault.last_modified > @policy.running_period.seconds
+      Time.now - @vault.last_modified > @policy.running_period.seconds - SLACK
     end
   end
 
   def backup
-    @type == :database ? self.backup_database : self.backup_filesystem
-  end
-
-  def backup_database
-    mysqldump = "mysqldump 
-                 --skip-dump-date
-                 -u#{@source['user']} 
-                 -p#{@source['password']}
-                   #{@source['database']}".gsub(/\s+/,' ').strip
     @vault.ensure_exists 
-    filename = File.join(@vault.directory,
-        Time.now.strftime('%Y-%m-%dT%H-%M-%S_0.sql.gz') )
-    `ssh #{@user}@#{@host} '#{mysqldump} | gzip -c' > #{filename} `
-    @vault.add_record(filename)
-  end 
-
-  def backup_filesystem
-    #TODO
-  end 
-
-  def no_backup
-    #TODO log info here
+    dest_file = self.new_record_path
+    if @type == :database 
+      self.backup_database(dest_file)
+    else
+      self.backup_filesystem(dest_file)
+    end
+    @vault.add_record(dest_file)
+    Log.status(dest_file)
   end
 
-  def try_backup; self.needs_backup? ? self.backup : self.no_backup end
+  def new_record_path
+    ext = @type == :database ? '.sql.gz' : ''
+    File.join(@vault.directory, Time.now.strftime('%Y-%m-%dT%H-%M-%S_0'+ext) )
+  end
+
+  def backup_database(dest_file)
+    dump = "mysqldump 
+            --skip-dump-date
+            -u#{@source['user']} 
+            -p#{@source['password']}
+              #{@source['database']}".gsub(/\s+/,' ').strip
+    `ssh #{@user}@#{@host} '#{dump} | gzip -c' > #{dest_file} `
+  end 
+
+  def backup_filesystem(dest_file)
+    `rsync #{dest_file}`
+  end 
+
+  def try_backup; if self.needs_backup?; self.backup end end
 
 end
 
