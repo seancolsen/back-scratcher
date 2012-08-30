@@ -1,6 +1,6 @@
 require 'lib/job'
 
-class JobCollection
+class Collection
   attr_accessor :jobs
   include Enumerable
 
