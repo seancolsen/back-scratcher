@@ -1,18 +1,22 @@
 require 'lib/job'
 
 class Collection
-  attr_accessor :jobs
+  attr_accessor :jobs, :path
   include Enumerable
 
-  def self.load_from_yaml(file)
-    j = self.new
-    j.jobs = Job.load_from_yaml(file)
-    j
+  def initialize(path)
+    @path = path || '.'
+    @jobs = Job.load_from_collection_path(@path)
+    # TODO: check for duplicate job names 
   end
 
   def each(&block); jobs.each(&block) end
 
   def backup
+    jobs.each { |job| job.backup }
+  end
+
+  def try_backup
     jobs.each { |job| job.try_backup }
   end
 

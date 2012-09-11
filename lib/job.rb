@@ -1,27 +1,37 @@
 require 'lib/policy'
 require 'lib/vault'
+require 'yaml'
 
 class Job
-  attr_accessor :name, :host, :user, :policy, :source, :type, :vault
+  attr_accessor :name, :host, :user, :policy, :source, :type, :vault,
+                :collection_path
 
   # Number of seconds before a backup is scheduled that it's okay for us 
   # make one.
   SLACK = 120 
 
-  def initialize(name, settings)
+  def initialize(name, settings, collection_path)
     @name = name
+    @collection_path = collection_path
     @policy = Policy.new(settings['keep-every']) 
     @source = settings['source'] 
     @type = @source['database'] ? :database : :filesystem
-    @vault = Vault.new(@name)
+    @vault = Vault.new(File.join(@collection_path,'vault',@name)) 
     @user = settings['user']
     @host = settings['host']
   end
 
   def self.load_from_yaml(yaml_file)
+  end
+
+  def self.load_from_collection_path(path)
     # returns an array of job objects 
+    yaml_file = File.join(path,'jobs.yaml')
+    if !File.exists?(yaml_file)
+      Log.fatal("Jobs configuration file not found at #{yaml_file}")
+    end
     YAML.load_file(yaml_file).map do |name, settings|
-      Job.new(name, settings) 
+      self.new(name, settings, path ) 
     end
   end
 
@@ -42,7 +52,7 @@ class Job
       self.backup_filesystem(dest_file)
     end
     @vault.add_record(dest_file)
-    Log.status(dest_file)
+    Log.info(dest_file)
   end
 
   def new_record_path
@@ -63,7 +73,9 @@ class Job
     `rsync #{dest_file}`
   end 
 
-  def try_backup; if self.needs_backup?; self.backup end end
+  def try_backup
+    if self.needs_backup?; self.backup end 
+  end
 
 end
 

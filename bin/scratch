@@ -1,8 +1,7 @@
 #!/usr/bin/env ruby
 
 $:.unshift File.join(File.dirname(__FILE__),'..') 
-require 'yaml'
-require 'lib/job_collection'
+require 'lib/collection'
 require 'lib/log'
 require 'rubygems'
 require 'gli'
@@ -15,11 +14,8 @@ arg_name '<collection_path>'
 command :backup do |b|
   b.switch :f, :force, :desc => 'make backups even if not yet needed'
   b.action do |gopts, opts, args|
-    p gopts
-
-    #jobs_file = File.join($proj_dir, 'jobs.yaml')
-    #jobs = JobCollection.load_from_yaml(jobs_file)
-    #jobs.backup
+    collection = Collection.new(args.first)
+    opts[:force] ? collection.backup : collection.try_backup
   end
 end
 

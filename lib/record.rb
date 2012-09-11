@@ -18,6 +18,8 @@ class Record
 
   def directory?; File.directory?(@path) end
 
+  def substantial?; @size > 0 end
+  
   def update_size
     @size.bytes = self.real_size
     @file = @file.gsub(PATTERN, '\1-\2-\3T\4-\5-\6_' + @size.to_s + '\8')
