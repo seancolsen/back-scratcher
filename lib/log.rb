@@ -24,7 +24,8 @@ module Log
   end
   
   def self.fatal(msg)
-
+    p msg
+    exit 
   end
 
 

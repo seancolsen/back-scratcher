@@ -10,6 +10,9 @@ class Size
 
   def zero?; @bytes == nil or @bytes == 0 end
 
-  def <=>(other); self.bytes <=> other.bytes end
+  def <=>(other); 
+    other = Size.new(other.to_i) unless other.class == Size
+    self.bytes <=> other.bytes
+  end
 
 end

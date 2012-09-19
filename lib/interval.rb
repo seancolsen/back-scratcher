@@ -4,10 +4,15 @@ class Interval
   include Comparable
   attr_accessor :period, :lifetime 
 
-  def initialize(phrase)
-    period, lifetime = phrase.split(' for ') 
-    @period = Duration.new(period)
-    @lifetime = Duration.new(lifetime)
+  def initialize(input)
+    if input.class == Interval
+      @period = input.period
+      @lifetime = input.lifetime
+    else
+      period, lifetime = input.split(' for ') 
+      @period = Duration.new(period)
+      @lifetime = Duration.new(lifetime)
+    end
   end
   
   def <=>(other)

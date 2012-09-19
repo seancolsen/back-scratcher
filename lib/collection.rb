@@ -10,20 +10,18 @@ class Collection
     # TODO: check for duplicate job names 
   end
 
-  def each(&block); jobs.each(&block) end
+  def each(&block); @jobs.each(&block) end
 
   def backup
-    jobs.each { |job| job.backup }
+    @jobs.each { |job| job.backup }
   end
 
   def try_backup
-    jobs.each { |job| job.try_backup }
+    @jobs.each { |job| job.try_backup }
   end
 
   def prune
-    #TODO
-    puts 'pruning'
-    Log.info('ok here we go')
+    @jobs.each { |job| job.prune }
   end
 
   def report

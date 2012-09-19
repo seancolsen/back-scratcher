@@ -19,5 +19,23 @@ command :backup do |b|
   end
 end
 
+desc 'Delete stale backups to conserve space'
+arg_name '<collection_path>'
+command :prune do |b|
+  b.action do |gopts, opts, args|
+    collection = Collection.new(args.first)
+    collection.prune
+  end
+end
+
+desc 'Show information about backups'
+arg_name '<collection_path>'
+command :report do |b|
+  b.action do |gopts, opts, args|
+    collection = Collection.new(args.first)
+    collection.report
+  end
+end
+
 exit run(ARGV)
 

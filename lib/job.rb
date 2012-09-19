@@ -16,7 +16,7 @@ class Job
     @policy = Policy.new(settings['keep-every']) 
     @source = settings['source'] 
     @type = @source['database'] ? :database : :filesystem
-    @vault = Vault.new(File.join(@collection_path,'vault',@name)) 
+    @vault = Vault.new(File.join(@collection_path,'vault',@name), @policy) 
     @user = settings['user']
     @host = settings['host']
   end
@@ -51,8 +51,7 @@ class Job
     else
       self.backup_filesystem(dest_file)
     end
-    @vault.add_record(dest_file)
-    Log.info(dest_file)
+    #@vault.add_record(dest_file)
   end
 
   def new_record_path
@@ -70,12 +69,15 @@ class Job
   end 
 
   def backup_filesystem(dest_file)
-    `rsync #{dest_file}`
+    cmd = "rsync -azx #{@user}@#{@host}:#{@source['directory']} #{dest_file}"
+    #puts cmd
   end 
 
   def try_backup
     if self.needs_backup?; self.backup end 
   end
+
+  def prune; @vault.prune end
 
 end
 

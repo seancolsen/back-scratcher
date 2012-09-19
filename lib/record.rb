@@ -1,7 +1,8 @@
 require 'lib/size'
+require 'lib/ripeness'
 
 class Record
-  attr_accessor :date, :size, :path, :file, :type
+  attr_accessor :date, :size, :path, :file, :type, :ripeness
   include Comparable
 
   PATTERN = /^(\d\d\d\d)-(\d\d)-(\d\d)T(\d\d)-(\d\d)-(\d\d)_(\d+)(.*)$/
@@ -34,6 +35,10 @@ class Record
 
   def real_size; self.directory? ? self.directory_size : self.file_size end
 
+  def create_ripeness(policy)
+    @ripeness = Ripeness.new(policy, @date)
+  end
+
   def self.from_dir_contents(directory)
     Dir.glob(File.join(directory,'*')).map do |file|
       Record.new(file) 
@@ -43,5 +48,11 @@ class Record
   def <=>(other)
     self.date <=> other.date
   end
+
+  def coordinate(criteria); @ripeness.coordinate(criteria) end
+
+  def keep?; @ripeness.coordinates.keep? end
+
+  def prune?; !self.keep? end
 
 end
