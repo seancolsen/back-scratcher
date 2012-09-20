@@ -55,4 +55,10 @@ class Record
 
   def prune?; !self.keep? end
 
+  def erase!
+    File.delete(@path)
+    rescue
+      Log.error("unable to delete file #{@path}")
+  end
+
 end

@@ -20,8 +20,8 @@ class Collection
     @jobs.each { |job| job.try_backup }
   end
 
-  def prune
-    @jobs.each { |job| job.prune }
+  def prune(opts)
+    @jobs.each { |job| job.prune(opts) }
   end
 
   def report

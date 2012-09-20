@@ -9,6 +9,7 @@ class Vault
     @directory = path
     @records = Record.from_dir_contents(@directory)
     @policy = policy
+    @job_name = File.basename(@directory)
   end
 
   def non_zero_record_count; non_zero_records.length end
@@ -61,12 +62,28 @@ class Vault
     end
   end
 
-  def prune
+  def prune(opts)
+    Log.info "pruning #{@job_name}"
     self.check_ripeness
-    @records.select do |record|
-      record.prune?
-    end.each do |record|
-      p record.file
+    @records.sort_by {|r| r.path }.each do |record|
+      descriptor = "#{@job_name}/#{record.file}"
+      if opts[:pretend] 
+        if record.prune? 
+          Log.info    "TO PRUNE: #{descriptor} " 
+        else 
+          Log.verbose "    keep: #{descriptor} " 
+        end
+      else # no-pretend
+        if record.prune? 
+          if record.erase!
+            Log.info  "PRUNED: #{descriptor} " 
+          else
+            Log.error "Unable to prune #{descriptor}"
+          end
+        else 
+          Log.verbose "  kept: #{descriptor} " 
+        end
+      end
     end
   end
 

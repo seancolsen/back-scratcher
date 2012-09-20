@@ -44,6 +44,7 @@ class Job
   end
 
   def backup
+    Log.info("backing up #{@name} ")
     @vault.ensure_exists 
     dest_file = self.new_record_path
     if @type == :database 
@@ -77,7 +78,7 @@ class Job
     if self.needs_backup?; self.backup end 
   end
 
-  def prune; @vault.prune end
+  def prune(opts); @vault.prune(opts) end
 
 end
 

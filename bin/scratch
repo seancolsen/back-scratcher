@@ -3,16 +3,26 @@
 $:.unshift File.join(File.dirname(__FILE__),'..') 
 require 'lib/collection'
 require 'lib/log'
+require 'lib/string'
 require 'rubygems'
 require 'gli'
 include GLI::App
 
 version '0.0.1'
+program_desc 'A tool to make and manage backups for multiple data sources'
+
+desc 'Be verbose'
+switch [:v,:verbose]
+
+pre do |global_options,command,options,args|
+  Log.setup
+  Log.be_verbose if global_options[:v]
+end
 
 desc 'Make backups'
 arg_name '<collection_path>'
 command :backup do |b|
-  b.switch :f, :force, :desc => 'make backups even if not yet needed'
+  b.switch :f, :force, :desc => 'Make backups even if not yet needed'
   b.action do |gopts, opts, args|
     collection = Collection.new(args.first)
     opts[:force] ? collection.backup : collection.try_backup
@@ -22,9 +32,16 @@ end
 desc 'Delete stale backups to conserve space'
 arg_name '<collection_path>'
 command :prune do |b|
+  b.switch :f, :force, :desc => <<-DOC.flatten
+    Still prune even when the number of files to prune exceeds the percentage
+    threshold (default = 25%)
+    DOC
+  b.switch :p, :pretend, :desc => <<-DOC.flatten
+    Don't actually delete any files. Just show what prune would do.
+    DOC
   b.action do |gopts, opts, args|
     collection = Collection.new(args.first)
-    collection.prune
+    collection.prune(opts)
   end
 end
 

@@ -3,12 +3,20 @@ require 'singleton'
 module Log
 
   def self.setup
-    puts "setup logging"
     @@DEBUG = true
+    @@VERBOSE = false
+  end
+
+  def self.be_verbose
+    @@VERBOSE = true
   end
 
   def self.debug(msg)
     puts msg if @@DEBUG
+  end
+
+  def self.verbose(msg)
+    puts msg if @@VERBOSE
   end
 
   def self.info(msg)
@@ -16,15 +24,15 @@ module Log
   end
 
   def self.warn(msg)
-
+    puts 'WARNING ' + msg.to_s
   end
 
   def self.error(msg)
-
+    puts 'ERROR!! ' + msg.to_s
   end
   
   def self.fatal(msg)
-    p msg
+    puts 'FATAL ERROR!! ' + msg.to_s
     exit 
   end
 
