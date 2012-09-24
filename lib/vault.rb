@@ -24,7 +24,13 @@ class Vault
 
   def each(&block); @records.each(&block) end
 
-  def add_record(path); @records << Record.new(path) end
+  def add_record(path)
+    if File.exists?(path)
+      @records << Record.new(path) 
+    else
+      Log.warn("new record doesn't exist at #{path}")
+    end
+  end
   
   def non_zero_records; @records.select {|r| r.substantial?} end
   
@@ -65,7 +71,7 @@ class Vault
   def prune(opts)
     Log.info "pruning #{@job_name}"
     self.check_ripeness
-    @records.sort_by {|r| r.path }.each do |record|
+    @records.sort_by(&:path).each do |record|
       descriptor = "#{@job_name}/#{record.file}"
       if opts[:pretend] 
         if record.prune? 

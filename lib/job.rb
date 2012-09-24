@@ -21,20 +21,6 @@ class Job
     @host = settings['host']
   end
 
-  def self.load_from_yaml(yaml_file)
-  end
-
-  def self.load_from_collection_path(path)
-    # returns an array of job objects 
-    yaml_file = File.join(path,'jobs.yaml')
-    if !File.exists?(yaml_file)
-      Log.fatal("Jobs configuration file not found at #{yaml_file}")
-    end
-    YAML.load_file(yaml_file).map do |name, settings|
-      self.new(name, settings, path ) 
-    end
-  end
-
   def needs_backup?
     if @vault.last_modified == nil
       true
@@ -52,7 +38,7 @@ class Job
     else
       self.backup_filesystem(dest_file)
     end
-    #@vault.add_record(dest_file)
+    @vault.add_record(dest_file)
   end
 
   def new_record_path
@@ -61,21 +47,38 @@ class Job
   end
 
   def backup_database(dest_file)
-    dump = "mysqldump 
-            --skip-dump-date
-            -u#{@source['user']} 
-            -p#{@source['password']}
-              #{@source['database']}".gsub(/\s+/,' ').strip
-    `ssh #{@user}@#{@host} '#{dump} | gzip -c' > #{dest_file} `
+    dump = <<-CMD.flatten
+      mysqldump 
+      --skip-dump-date
+      -u#{@source['user']} 
+      -p#{@source['password']}
+        #{@source['database']}
+      CMD
+    `ssh #{@user}@#{@host} '#{dump} | gzip -c' > "#{dest_file}" `
   end 
 
   def backup_filesystem(dest_file)
-    cmd = "rsync -azx #{@user}@#{@host}:#{@source['directory']} #{dest_file}"
-    #puts cmd
+    ignore = @source['ignore'].map{|i| "--exclude='#{i}' "}.reduce(:+)
+    link_dest = if @vault.latest_record
+      "--link-dest='#{File.expand_path(@vault.latest_record.path)}' "
+      else ''
+      end
+    source_directory = @source['directory'].chomp('/').concat('/')
+    cmd = <<-CMD.flatten
+      rsync -avzx #{ignore} #{link_dest} 
+      "#{@user}@#{@host}:'#{source_directory}'"
+      "#{dest_file}"
+      CMD
+    puts cmd
+    `#{cmd}`
   end 
 
   def try_backup
-    if self.needs_backup?; self.backup end 
+    if self.needs_backup? 
+      self.backup 
+    else
+      Log.verbose("Skipping #{@name}. Last backed up #{@vault.last_modified}")
+    end 
   end
 
   def prune(opts); @vault.prune(opts) end

@@ -27,11 +27,21 @@ class Record
     oldpath = @path
     @path = File.join(File.dirname(@path),@file)
     File.rename(oldpath,@path)
+    rescue
+      Log.error("unable to update size for #{@path}")
   end
 
-  def directory_size; `du -s #{@path}`.split("\t")[0].to_i end
+  def directory_size
+    `du -s #{@path}`.split("\t")[0].to_i 
+    rescue
+      Log.error("unable to determine total directory size of #{@path}")
+  end
 
-  def file_size; File.stat(@path).size end
+  def file_size
+   File.stat(@path).size 
+    rescue
+      Log.error("unable to determine file size of #{@path}")
+  end
 
   def real_size; self.directory? ? self.directory_size : self.file_size end
 
@@ -56,7 +66,11 @@ class Record
   def prune?; !self.keep? end
 
   def erase!
-    File.delete(@path)
+    if self.directory?
+      `rm -rf "#{@path}"`
+    else
+      File.delete(@path)
+    end
     rescue
       Log.error("unable to delete file #{@path}")
   end

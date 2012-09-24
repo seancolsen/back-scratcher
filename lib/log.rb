@@ -36,5 +36,4 @@ module Log
     exit 
   end
 
-
 end

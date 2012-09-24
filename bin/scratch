@@ -17,20 +17,23 @@ switch [:v,:verbose]
 pre do |global_options,command,options,args|
   Log.setup
   Log.be_verbose if global_options[:v]
+  true
 end
 
+collection_args_desc = '[COLLECTION_PATH] [JOB_NAME]...'
+
 desc 'Make backups'
-arg_name '<collection_path>'
+arg_name collection_args_desc
 command :backup do |b|
   b.switch :f, :force, :desc => 'Make backups even if not yet needed'
   b.action do |gopts, opts, args|
-    collection = Collection.new(args.first)
+    collection = Collection.new(args)
     opts[:force] ? collection.backup : collection.try_backup
   end
 end
 
 desc 'Delete stale backups to conserve space'
-arg_name '<collection_path>'
+arg_name collection_args_desc
 command :prune do |b|
   b.switch :f, :force, :desc => <<-DOC.flatten
     Still prune even when the number of files to prune exceeds the percentage
@@ -40,16 +43,16 @@ command :prune do |b|
     Don't actually delete any files. Just show what prune would do.
     DOC
   b.action do |gopts, opts, args|
-    collection = Collection.new(args.first)
+    collection = Collection.new(args)
     collection.prune(opts)
   end
 end
 
 desc 'Show information about backups'
-arg_name '<collection_path>'
+arg_name collection_args_desc
 command :report do |b|
   b.action do |gopts, opts, args|
-    collection = Collection.new(args.first)
+    collection = Collection.new(args)
     collection.report
   end
 end
