@@ -2,7 +2,7 @@ require 'lib/record'
 require 'lib/duration'
 
 class Vault
-  attr_accessor :directory, :records
+  attr_accessor :directory, :records, :policy
   include Enumerable
 
   def initialize(path, policy)

@@ -49,19 +49,26 @@ class Collection
   def each(&block); @jobs.each(&block) end
 
   def backup
-    @jobs.each { |job| job.backup }
+    @jobs.each {|job| job.backup }
   end
 
   def try_backup
-    @jobs.each { |job| job.try_backup }
+    @jobs.each {|job| job.try_backup }
   end
 
   def prune(opts)
-    @jobs.each { |job| job.prune(opts) }
+    @jobs.each {|job| job.prune(opts) }
   end
 
   def report
-    @jobs.each {|job| puts job.name }
+    date = Time.now.strftime('%FT%R')
+    path = File.expand_path(@path)
+    puts <<-MSG.unindent
+      == Back Scratcher Report == 
+      date: #{date}
+      collection_path: #{path}
+      MSG
+    @jobs.sort_by(&:name).each {|job| job.report }
   end
 
 end
