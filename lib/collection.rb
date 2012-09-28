@@ -63,10 +63,12 @@ class Collection
   def report
     date = Time.now.strftime('%FT%R')
     path = File.expand_path(@path)
+    size = Size.of_directory(@path).approx_human_description
     puts <<-MSG.unindent
       == Back Scratcher Report == 
       date: #{date}
       collection_path: #{path}
+      collection_size: #{size}
       MSG
     @jobs.sort_by(&:name).each {|job| job.report }
   end

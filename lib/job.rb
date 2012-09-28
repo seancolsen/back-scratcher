@@ -86,35 +86,32 @@ class Job
 
   def report
     metrics = [
-      :date_of_last_backup,
-      :time_since_last_backup,
-      :backup_frequency,
-      :size_of_last_backup,
-      :size_of_largest_backup,
-      :size_of_average_backup,
-      :size_of_median_backup,
-      :size_of_entire_vault,
-      :number_of_backups_now,
-      :number_of_backups_allowed
+      [:date_of_last_backup       , :skip_when_empty ] ,
+      [:time_since_last_backup    , :skip_when_empty ] ,
+      [:backup_frequency          , :skip_when_empty ] ,
+      [:size_of_last_backup       , :skip_when_empty ] ,
+      [:size_of_largest_backup    , :skip_when_empty ] ,
+      [:size_of_average_backup    , :skip_when_empty ] ,
+      [:size_of_median_backup     , :skip_when_empty ] ,
+      [:size_of_entire_vault      , :skip_when_empty ] ,
+      [:number_of_backups_now     , :always          ] ,
+      [:number_of_backups_allowed , :always          ]
     ]
     puts "\n-- job #{@name} --"
-    metrics.each do |metric|
-      print metric.to_s + ": "
-      #begin 
+    metrics.each do |i|
+      metric,condition = i
+      if !@vault.empty? || condition == :always
+        print metric.to_s + ": "
         puts self.send( ("report_" + metric.to_s).to_sym )
-      #rescue 
-        #Log.warn("Unable to execute metric #{metric}")
-      #end
+      end
     end
   end
 
   def report_date_of_last_backup
-    lm = @vault.last_modified
-    lm ? lm.strftime('%FT%R') : 'never'
+    @vault.last_modified.strftime('%FT%R')
   end
 
   def report_time_since_last_backup
-    return 'n/a' if @vault.empty?
     duration = Duration.new(Time.now - @vault.last_modified)
     "about #{duration.approx_human_description} ago"
   end
@@ -124,27 +121,31 @@ class Job
   end
 
   def report_size_of_last_backup
-    'TODO'
+    @vault.latest_record.size.approx_human_description
   end
 
   def report_size_of_largest_backup
-    'TODO'
+    @vault.sort_by(&:size).last.size.approx_human_description
   end
 
   def report_size_of_average_backup
-    'TODO'
+    sizes = @vault.map(&:size)
+    (sizes.inject(:+)/sizes.length).approx_human_description
   end
 
   def report_size_of_median_backup
-    'TODO'
+    sorted = @vault.map(&:size).sort
+    len = sorted.length
+    size = len%2 == 1 ? sorted[len/2] : (sorted[len/2-1]+sorted[len/2])/2.to_f
+    size.approx_human_description
   end
 
   def report_size_of_entire_vault
-    'TODO'
+    Size.of_directory(@vault.directory).approx_human_description
   end
 
   def report_number_of_backups_now
-    'TODO'
+    @vault.non_zero_record_count
   end
 
   def report_number_of_backups_allowed
