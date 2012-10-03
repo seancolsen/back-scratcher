@@ -1,6 +1,3 @@
-require 'lib/size'
-require 'lib/ripeness'
-
 class Record
   attr_accessor :date, :size, :path, :file, :type, :ripeness
   include Comparable
@@ -32,7 +29,7 @@ class Record
   end
 
   def directory_size
-    `du -s #{@path}`.split("\t")[0].to_i 
+    `du -s --bytes #{@path}`.split("\t")[0].to_i 
     rescue
       Log.error("unable to determine total directory size of #{@path}")
   end

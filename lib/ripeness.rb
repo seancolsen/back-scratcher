@@ -1,5 +1,3 @@
-require 'lib/coordinates'
-
 class Ripeness
   attr_accessor :score, :coordinates
 

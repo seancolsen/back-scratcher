@@ -1,11 +1,7 @@
 #!/usr/bin/env ruby
 
 $:.unshift File.join(File.dirname(__FILE__),'..') 
-require 'lib/collection'
-require 'lib/log'
-require 'lib/string'
-require 'rubygems'
-require 'gli'
+require 'lib/require'
 include GLI::App
 
 version '0.0.1'
@@ -35,10 +31,6 @@ end
 desc 'Delete stale backups to conserve space'
 arg_name collection_args_desc
 command :prune do |b|
-  b.switch :f, :force, :desc => <<-DOC.flatten
-    Still prune even when the number of files to prune exceeds the percentage
-    threshold (default = 25%)
-    DOC
   b.switch :p, :pretend, :desc => <<-DOC.flatten
     Don't actually delete any files. Just show what prune would do.
     DOC
@@ -51,9 +43,12 @@ end
 desc 'Show information about backups'
 arg_name collection_args_desc
 command :report do |b|
+  b.switch :q, :quick, :desc => <<-DOC.flatten
+    Save time by skipping the calculation of directory sizes
+    DOC
   b.action do |gopts, opts, args|
     collection = Collection.new(args)
-    collection.report
+    collection.report(opts)
   end
 end
 

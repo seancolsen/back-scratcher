@@ -1,5 +1,3 @@
-require 'lib/interval'
-
 class Policy
   attr_accessor :intervals
   include Enumerable

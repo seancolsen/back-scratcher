@@ -1,11 +1,6 @@
-require 'lib/policy'
-require 'lib/vault'
-require 'lib/duration'
-require 'yaml'
-
 class Job
   attr_accessor :name, :host, :user, :policy, :source, :type, :vault,
-                :collection_path
+                :collection_path, :constraints
 
   # Number of seconds before a backup is scheduled that it's okay for us 
   # make one.
@@ -15,6 +10,7 @@ class Job
     @name = name
     @collection_path = collection_path
     @policy = Policy.new(settings['keep-every']) 
+    @constraints = Constraints.new(settings['only-backup-when'])
     @source = settings['source'] 
     @type = @source['database'] ? :database : :filesystem
     @vault = Vault.new(File.join(@collection_path,'vault',@name), @policy) 
@@ -22,12 +18,20 @@ class Job
     @host = settings['host']
   end
 
-  def needs_backup?
-    if @vault.last_modified == nil
-      true
-    else
-      Time.now - @vault.last_modified > @policy.running_period.seconds - SLACK
+  def reason_to_skip
+    if !@constraints.timing_ok?
+      'constraints say now is not a good time'
+    elsif @vault.last_modified == nil
+      nil
+    elsif Time.now - @vault.last_modified <= 
+        @policy.running_period.seconds - SLACK
+      "we have a recent backup from #{@vault.last_modified}"
+    else nil
     end
+  end
+
+  def needs_backup?
+    self.reason_to_skip == nil
   end
 
   def backup
@@ -78,29 +82,30 @@ class Job
     if self.needs_backup? 
       self.backup 
     else
-      Log.verbose("Skipping #{@name}. Last backed up #{@vault.last_modified}")
+      Log.verbose("Skipping #{@name} because #{self.reason_to_skip}")
     end 
   end
 
   def prune(opts); @vault.prune(opts) end
 
-  def report
+  def report(opts)
     metrics = [
-      [:date_of_last_backup       , :skip_when_empty ] ,
-      [:time_since_last_backup    , :skip_when_empty ] ,
-      [:backup_frequency          , :skip_when_empty ] ,
-      [:size_of_last_backup       , :skip_when_empty ] ,
-      [:size_of_largest_backup    , :skip_when_empty ] ,
-      [:size_of_average_backup    , :skip_when_empty ] ,
-      [:size_of_median_backup     , :skip_when_empty ] ,
-      [:size_of_entire_vault      , :skip_when_empty ] ,
-      [:number_of_backups_now     , :always          ] ,
-      [:number_of_backups_allowed , :always          ]
+      [:date_of_last_backup       , :skip_when_empty , :fast ] ,
+      [:time_since_last_backup    , :skip_when_empty , :fast ] ,
+      [:backup_frequency          , :always          , :fast ] ,
+      [:backup_scheduling         , :always          , :fast ] ,
+      [:size_of_last_backup       , :skip_when_empty , :fast ] ,
+      [:size_of_largest_backup    , :skip_when_empty , :fast ] ,
+      [:size_of_average_backup    , :skip_when_empty , :fast ] ,
+      [:size_of_median_backup     , :skip_when_empty , :fast ] ,
+      [:size_of_entire_vault      , :skip_when_empty , :slow ] ,
+      [:number_of_backups_now     , :always          , :fast ] ,
+      [:number_of_backups_allowed , :always          , :fast ]
     ]
     puts "\n-- job #{@name} --"
     metrics.each do |i|
-      metric,condition = i
-      if !@vault.empty? || condition == :always
+      metric, cond, speed = i
+      if (!@vault.empty? || cond==:always) and (!opts[:quick] || speed==:fast)
         print metric.to_s + ": "
         puts self.send( ("report_" + metric.to_s).to_sym )
       end
@@ -119,6 +124,10 @@ class Job
   def report_backup_frequency
     "roughly every #{@vault.policy.running_period.approx_human_description}"
   end
+
+  def report_backup_scheduling
+    @constraints.human_description || 'all the time'
+  end 
 
   def report_size_of_last_backup
     @vault.latest_record.size.approx_human_description
@@ -153,4 +162,3 @@ class Job
   end
 
 end
-

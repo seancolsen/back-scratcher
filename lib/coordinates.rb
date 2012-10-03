@@ -1,5 +1,3 @@
-require 'lib/coordinate'
-
 class Coordinates
   attr_accessor :coordinates
   include Enumerable

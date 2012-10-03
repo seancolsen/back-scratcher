@@ -1,5 +1,3 @@
-require 'lib/duration'
-
 class Interval
   include Comparable
   attr_accessor :period, :lifetime 
