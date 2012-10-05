@@ -17,4 +17,8 @@ class Interval
     self.period.seconds <=> other.period.seconds
   end
 
+  def record_capacity(lifetime_reduction = 0)
+    ( (@lifetime - lifetime_reduction) / @period ).ceil.seconds
+  end
+
 end

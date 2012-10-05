@@ -70,7 +70,7 @@ class Job
       end
     source_directory = @source['directory'].chomp('/').concat('/')
     cmd = <<-CMD.flatten
-      rsync -avzx #{ignore} #{link_dest} 
+      rsync -avzx --super #{ignore} #{link_dest} 
       "#{@user}@#{@host}:'#{source_directory}'"
       "#{dest_file}"
       CMD
@@ -158,7 +158,8 @@ class Job
   end
 
   def report_number_of_backups_allowed
-    'TODO'
+    @policy.record_capacity
   end
 
 end
+

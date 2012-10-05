@@ -1,4 +1,4 @@
-class Duration
+class Duration 
   attr_accessor :seconds
   include Comparable
 
@@ -11,22 +11,23 @@ class Duration
   def initialize(description)
     case description
     when String
-      if description.eql?('eternity') 
-        @seconds = 0
-      else
-        value, units = description.to_s.split
-        multiplier = units.nil? ? 1 : UNITS[units.downcase.chomp('s').to_sym]
-        if multiplier.nil? then raise "Unknown duration units '#{units}'" end    
-        @seconds = value.to_i * multiplier
-      end
-    when Fixnum, Float
+      value, units = description.to_s.split
+      multiplier = units.nil? ? 1 : UNITS[units.downcase.chomp('s').to_sym]
+      if multiplier.nil? then raise "Unknown duration units '#{units}'" end    
+      @seconds = value.to_i * multiplier
+    when Integer, Fixnum, Float
       @seconds = description 
     else raise "Invalid duration criteria #{description}"
     end
   end
 
   def <=>(other)
-    self.seconds <=> other.seconds
+    @seconds <=> other.seconds
+  end
+
+  def method_missing(name, *args, &blk)
+    ret = @seconds.send(name, *args, &blk)
+    ret.is_a?(Numeric) ? Duration.new(ret) : ret
   end
 
   def approx_human_description

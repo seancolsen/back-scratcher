@@ -13,5 +13,13 @@ class Policy
 
   def each(&block); @intervals.each(&block) end
 
-end
+  def record_capacity
+    lifetime_carryover = 0
+    @intervals.sort_by(&:lifetime).map do |interval|
+      previous_lifetime = lifetime_carryover 
+      lifetime_carryover = interval.lifetime
+      capactiy = interval.record_capacity(previous_lifetime)
+    end.inject(:+)
+  end
 
+end
