@@ -70,7 +70,7 @@ class Job
       end
     source_directory = @source['directory'].chomp('/').concat('/')
     cmd = <<-CMD.flatten
-      rsync -avzx --super #{ignore} #{link_dest} 
+      rsync -avzx #{ignore} #{link_dest} 
       "#{@user}@#{@host}:'#{source_directory}'"
       "#{dest_file}"
       CMD

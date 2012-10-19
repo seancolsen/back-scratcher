@@ -74,5 +74,9 @@ class Collection
     @jobs.sort_by(&:name).each {|job| job.report(opts) }
   end
 
+  def sync(opts)
+    # TODO
+  end
+
 end
 

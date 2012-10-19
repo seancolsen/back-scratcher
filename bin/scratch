@@ -52,5 +52,18 @@ command :report do |b|
   end
 end
 
+desc <<-MSG.flatten
+  Brings the remote collection in sync with the local collection by copying
+  files from local to remote and pruning the remote collection as needed. This
+  process does not make new backups. 
+  MSG
+arg_name collection_args_desc
+command :sync do |b|
+  b.action do |gopts, opts, args|
+    collection = Collection.new(args)
+    collection.sync(opts)
+  end
+end
+
 exit run(ARGV)
 
