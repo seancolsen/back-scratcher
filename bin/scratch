@@ -4,7 +4,7 @@ $:.unshift File.join(File.dirname(__FILE__),'..')
 require 'lib/require'
 include GLI::App
 
-version '0.0.1'
+version VERSION
 program_desc 'A tool to make and manage backups for multiple data sources'
 
 desc 'Be verbose'

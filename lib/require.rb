@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'gli'
 
+require 'lib/version'
 require 'lib/log'
 require 'lib/duration'
 require 'lib/interval'

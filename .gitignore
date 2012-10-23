@@ -1,3 +1,5 @@
 *.swp
 vault
 log
+pkg
+Gemfile.lock
