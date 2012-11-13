@@ -1,0 +1,35 @@
+# BackScratcher #
+A tool to make and manage backups for multiple data sources
+
+
+jobs.yaml
+---------
+
+A YAML file configuring backup jobs.
+
+Example job:
+
+    thud:
+      keep-every:
+        - 2 hour for 8 hour
+        - 1 day for 6 day
+        - 7 day for 90 day
+        - 60 day for 400 day
+      host: thud.bikesnotbombs.org
+      user: root
+      source: 
+        directory: /
+        ignore: 
+          - /var/lib/mysql
+
+Install
+------
+
+Locally:
+
+$ bundle install # install dependencies
+$ rake build && rake install
+
+Rubygems:
+
+-- coming soon!
