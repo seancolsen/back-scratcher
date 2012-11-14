@@ -11,7 +11,7 @@ class Report
     unless opts[:quick]
       @size = Size.of_directory(@collection.path)
 
-      if opts[:disk_usage]
+      if opts[:'disk-usage']
         @disk_usage = Utility.disk_usage(@collection.path)
       end
     end
