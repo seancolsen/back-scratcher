@@ -7,8 +7,7 @@ class Size
   def initialize(bytes); @bytes = bytes.to_i end
 
   def self.of_directory(dir)
-    du = `du -sb '#{dir}'`
-    Size.new(du.gsub(/^(\d+).*$/m,'\1').to_i)
+    Size.new(Utility.directory_size(dir))
   end
 
   def to_f; @bytes.to_f end

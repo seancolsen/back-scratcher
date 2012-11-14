@@ -3,7 +3,7 @@ class Collection
   include Enumerable
 
   def initialize(args)
-    @path = args.shift || '.'
+    @path = File.expand_path(args.shift || '.')
     self.populate_jobs_from_yaml_file(File.join(@path,'jobs.yaml'))
     self.filter_jobs!(args)
     self.ensure_unique_jobs
@@ -59,19 +59,8 @@ class Collection
   end
 
   def report(opts)
-    date = Time.now.strftime('%FT%R')
-    path = File.expand_path(@path)
-    size = if opts[:quick]
-      "(unknown due to quick reporting)"
-      else Size.of_directory(@path).approx_human_description  
-     end 
-    puts <<-MSG.unindent
-      == Back Scratcher Report == 
-      date: #{date}
-      collection_path: #{path}
-      collection_size: #{size}
-      MSG
-    @jobs.sort_by(&:name).each {|job| job.report(opts) }
+    report = Report.new(self, opts)
+    report.print
   end
 
   def sync(opts)

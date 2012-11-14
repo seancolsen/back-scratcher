@@ -28,19 +28,13 @@ class Record
       Log.error("unable to update size for #{@path}")
   end
 
-  def directory_size
-    `du -s --bytes #{@path}`.split("\t")[0].to_i 
-    rescue
-      Log.error("unable to determine total directory size of #{@path}")
-  end
-
   def file_size
    File.stat(@path).size 
     rescue
       Log.error("unable to determine file size of #{@path}")
   end
 
-  def real_size; self.directory? ? self.directory_size : self.file_size end
+  def real_size; self.directory? ? Utility.directory_size(@path) : self.file_size end
 
   def create_ripeness(policy)
     @ripeness = Ripeness.new(policy, @date)
