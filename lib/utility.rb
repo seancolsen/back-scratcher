@@ -1,4 +1,4 @@
-class FileUtil
+class Utility
   # uses du -k (size in kilobytes) and multiplies to bytes,
   # rather than du -b (size in bytes) due to cross-platform
   # issues.

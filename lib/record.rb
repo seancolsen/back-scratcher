@@ -1,5 +1,3 @@
-require 'file_util'
-
 class Record
   attr_accessor :date, :size, :path, :file, :type, :ripeness
   include Comparable
@@ -36,7 +34,7 @@ class Record
       Log.error("unable to determine file size of #{@path}")
   end
 
-  def real_size; self.directory? ? FileUtil.directory_size(@path) : self.file_size end
+  def real_size; self.directory? ? Utility.directory_size(@path) : self.file_size end
 
   def create_ripeness(policy)
     @ripeness = Ripeness.new(policy, @date)

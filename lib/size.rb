@@ -1,5 +1,3 @@
-require 'file_util'
-
 class Size
   attr_accessor :bytes
   include Comparable
@@ -9,7 +7,7 @@ class Size
   def initialize(bytes); @bytes = bytes.to_i end
 
   def self.of_directory(dir)
-    Size.new(FileUtil.directory_size(dir))
+    Size.new(Utility.directory_size(dir))
   end
 
   def to_f; @bytes.to_f end
