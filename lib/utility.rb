@@ -12,6 +12,6 @@ class Utility
     df_out = `df -k #{mount} | awk 'NR>1 {print $2, $3, $4, $5;}'`.split(/\s+/).map do |n|
       n = n.index("%") ? n : Size.new(n.to_i * 1024)
     end
-    Hash[[:total, :used, :available, :percent_used].zip(df_out.map)]
+    Hash[[:total, :used, :available, :percent_used].zip(df_out)]
   end
 end
