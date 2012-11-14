@@ -46,6 +46,9 @@ command :report do |b|
   b.switch :q, :quick, :desc => <<-DOC.flatten
     Save time by skipping the calculation of directory sizes
     DOC
+  b.switch :u, :disk_usage, :desc => <<-DOC.flatten
+    Report total disk usage
+  DOC
   b.action do |gopts, opts, args|
     collection = Collection.new(args)
     collection.report(opts)
